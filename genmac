@@ -61,7 +61,7 @@ def main(argv = ARGV)
   format = uppercase ? '%02X' : '%02x'
   1.upto(num_addresses) do
     if org
-      mac_octets = oui_octets_list[rand(oui_octets_list.size)]
+      mac_octets = oui_octets_list[rand(oui_octets_list.size)].dup
     else
       mac_octets = (1..3).collect { rand(256) }
     end
