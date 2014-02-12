@@ -3,24 +3,25 @@
 # Andrew Ho (andrew@zeuscat.com)
 #
 # References:
-# * http://en.wikipedia.org/wiki/MAC_address
-# * http://standards.ieee.org/develop/regauth/oui/public.html
+# * https://en.wikipedia.org/wiki/MAC_address
+# * https://en.wikipedia.org/wiki/Organizationally_Unique_Identifier
+# * https://standards.ieee.org/develop/regauth/oui/public.html
 # * https://github.com/feross/SpoofMAC
 
 require 'optparse'
 
 ME = File.basename($0)
 USAGE =
-  "usage: #{ME} [-h] [-v] [-l] [-u] [-n num] [-d delim] [-f oui_file] [mfg]\n"
+  "usage: #{ME} [-h] [-v] [-l] [-u] [-n num] [-d delim] [-f oui_file] [org]\n"
 FULL_USAGE = USAGE + <<'end'
   -h        display this help text and exit
-  -v        verbose mode, print debug messages and matching manufacturers
-  -l        set locally administered bit (default is universally administered)
-  -u        output uppercase hex digits (default is lowercase)
-  -n num    generate this many MAC addresses (default is 1)
-  -d delim  set delimiter to separate hex octets (default is colon)
-  -f file   IEEE organizationally unique identifiers file (default is oui.txt)
-  mfg       generate MAC address that appears to be from this manufacturer
+  -v        verbose mode, print debug messages and matching organizations
+  -l        set locally administered bit (default universally administered)
+  -u        output uppercase hex digits (default lowercase)
+  -n num    generate this many MAC addresses (default 1)
+  -d delim  set delimiter to separate hex octets (default colon)
+  -f file   IEEE organizationally unique identifiers file (default oui.txt)
+  org       generate MAC address from this organization (default random octets)
 end
 
 DEFAULT_OUI_FILE = File.join(File.dirname(__FILE__), 'oui.txt')
@@ -49,16 +50,17 @@ def main(argv = ARGV)
       abort "#{ME}: #{e}"
     end
   end
-  mfg = argv.empty? ? nil : argv.shift
-  if mfg
-    oui_octets_list = find_matching_oui_octets(oui_file, mfg)
+  org = argv.empty? ? nil : argv.shift
+  if org
+    puts "Searching for organization #{org} in file #{oui_file}..." if $verbose
+    oui_octets_list = find_matching_oui_octets(oui_file, org)
     if oui_octets_list.empty?
-      abort "#{ME}: could not find manufacturer matching: #{mfg}"
+      abort "#{ME}: could not find organization matching: #{org}"
     end
   end
   format = uppercase ? '%02X' : '%02x'
   1.upto(num_addresses) do
-    if mfg
+    if org
       mac_octets = oui_octets_list[rand(oui_octets_list.size)]
     else
       mac_octets = (1..3).collect { rand(256) }
@@ -82,14 +84,15 @@ def find_matching_oui_octets(filename, criteria = nil)
   begin
     File.open(filename, 'r').each do |line|
       if (matchdata = line.match(/^  (#{OUI_OCTETS})\s*\(hex\)\s*(.+)$/))
-        octets, manufacturer = matchdata[1,2]
-        if selector.call(manufacturer)
+        octets, organization = matchdata[1,2]
+        if selector.call(organization)
           if $verbose
             if octets_list.empty?
-              puts 'Octets   | Manufacturer'
+              puts
+              puts 'Octets   | Organization'
               puts '---------+-------------'
             end
-            puts "#{octets} | #{manufacturer}"
+            puts "#{octets} | #{organization}"
           end
           octets_list << octets.split(/-/).collect { |s| s.hex }
         end
