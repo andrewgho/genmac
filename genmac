@@ -1,0 +1,105 @@
+#!/usr/bin/env ruby
+# genmac - generate valid looking random MAC address
+# Andrew Ho (andrew@zeuscat.com)
+#
+# References:
+# * http://en.wikipedia.org/wiki/MAC_address
+# * http://standards.ieee.org/develop/regauth/oui/public.html
+# * https://github.com/feross/SpoofMAC
+
+require 'optparse'
+
+ME = File.basename($0)
+USAGE =
+  "usage: #{ME} [-h] [-v] [-l] [-u] [-n num] [-d delim] [-f oui_file] [mfg]\n"
+FULL_USAGE = USAGE + <<'end'
+  -h        display this help text and exit
+  -v        verbose mode, print debug messages and matching manufacturers
+  -l        set locally administered bit (default is universally administered)
+  -u        output uppercase hex digits (default is lowercase)
+  -n num    generate this many MAC addresses (default is 1)
+  -d delim  set delimiter to separate hex octets (default is colon)
+  -f file   IEEE organizationally unique identifiers file (default is oui.txt)
+  mfg       generate MAC address that appears to be from this manufacturer
+end
+
+DEFAULT_OUI_FILE = File.join(File.dirname(__FILE__), 'oui.txt')
+HEX_OCTET = %r{[0-9A-F][0-9A-F]}
+OUI_OCTETS = %r{#{HEX_OCTET}-#{HEX_OCTET}-#{HEX_OCTET}}
+
+$verbose = false
+
+def main(argv = ARGV)
+  locally_administered = false
+  uppercase = false
+  num_addresses = 1
+  delimiter = ':'
+  oui_file = DEFAULT_OUI_FILE
+  OptionParser.new do |opts|
+    opts.on('-h', '--help')           { puts FULL_USAGE; return 0 }
+    opts.on('-v', '--verbose')        { $verbose = true }
+    opts.on('-l', '--local')          { locally_administered = true }
+    opts.on('-u', '--uppercase')      { uppercase = true }
+    opts.on('-n NUM',  '--number')    { |arg| num_addresses = arg.to_i }
+    opts.on('-d DELIM','--delimiter') { |arg| delimiter = arg }
+    opts.on('-f FILE', '--file')      { |arg| oui_file = arg }
+    begin
+      opts.parse!(argv)
+    rescue OptionParser::InvalidOption => e
+      abort "#{ME}: #{e}"
+    end
+  end
+  mfg = argv.empty? ? nil : argv.shift
+  if mfg
+    oui_octets_list = find_matching_oui_octets(oui_file, mfg)
+    if oui_octets_list.empty?
+      abort "#{ME}: could not find manufacturer matching: #{mfg}"
+    end
+  end
+  format = uppercase ? '%02X' : '%02x'
+  1.upto(num_addresses) do
+    if mfg
+      mac_octets = oui_octets_list[rand(oui_octets_list.size)]
+    else
+      mac_octets = (1..3).collect { rand(256) }
+    end
+    (1..3).each { mac_octets << rand(256) }
+    mac_octets[0] |= 0x02 if locally_administered
+    mac = mac_octets.collect { |i| format % [i] }.join(delimiter)
+    puts mac
+  end
+  0
+end
+
+def find_matching_oui_octets(filename, criteria = nil)
+  selector =
+    criteria.is_a?(String) ? lambda { |s| s.match(%r{^#{criteria}\b}i) } :
+    criteria.is_a?(Regexp) ? lambda { |s| s.match(criteria) } :
+    criteria.is_a?(Proc)   ? lambda { |s| criteria.call(s) } :
+    block_given?           ? lambda { |s| yield(s) } :
+                             lambda { |s| true }
+  octets_list = []
+  begin
+    File.open(filename, 'r').each do |line|
+      if (matchdata = line.match(/^  (#{OUI_OCTETS})\s*\(hex\)\s*(.+)$/))
+        octets, manufacturer = matchdata[1,2]
+        if selector.call(manufacturer)
+          if $verbose
+            if octets_list.empty?
+              puts 'Octets   | Manufacturer'
+              puts '---------+-------------'
+            end
+            puts "#{octets} | #{manufacturer}"
+          end
+          octets_list << octets.split(/-/).collect { |s| s.hex }
+        end
+      end
+    end
+    puts if $verbose && !octets_list.empty?
+  rescue Errno::ENOENT => e
+    abort "#{ME}: could not open organizationally unique identifiers file: #{e}"
+  end
+  octets_list
+end
+
+exit(main(ARGV))
