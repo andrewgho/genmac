@@ -115,6 +115,8 @@ for instructions specific to your OS and version.
 See Also
 --------
 
+### General MAC Address/OUI Documentation ###
+
 * <https://en.wikipedia.org/wiki/MAC_address>
 * <https://en.wikipedia.org/wiki/Organizationally_Unique_Identifier>
 * <https://standards.ieee.org/develop/regauth/oui/public.html>
@@ -130,6 +132,12 @@ See Also
   `genmac` differs in that it considers real world OUIs instead of
   using a single hardcoded one, and is a standalone program that can
   be run without being installed as a library.
+
+### MAC Address Spoofing ###
+
+* <http://en.wikibooks.org/wiki/Changing_Your_MAC_Address/Linux>
+* <http://osxdaily.com/2012/03/01/change-mac-address-os-x/>
+* <http://www.wikihow.com/Change-a-Computer%27s-Mac-Address-in-Windows>
 
 Author
 ------
