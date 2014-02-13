@@ -156,9 +156,11 @@ See Also
 ### Prior Art ###
 
 * [GNU MAC Changer](https://github.com/alobbs/macchanger)
-  is a more fully featured program that ships with its own OUI database.
-  `genmac` differs in that it parses the raw IEEE OUI file, and is a
-  single-file Ruby script that can be run without compilation.
+  is a more fully featured program that can show and directly set MAC
+  addresses, and ships with its own OUI database. `genmac` differs in
+  that it parses a raw IEEE OUI file, which you can update for yourself
+  at any time; and is a single-file Ruby script that can be run without
+  compilation.
 * [SpoofMAC](https://github.com/feross/SpoofMAC)
   is a Python script and library to show and set MAC addresses.
   `genmac` differs in that it considers real world OUIs instead of
