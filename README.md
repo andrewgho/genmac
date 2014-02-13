@@ -18,11 +18,15 @@ Install the program by just copying it anywhere in your `$PATH`.
 
 For usage:
 
-    $ genmac -h
+```sh
+$ genmac -h
+```
 
 To generate a single, random MAC address:
 
-    $ genmac
+```sh
+$ genmac
+```
 
 Description
 -----------
@@ -48,9 +52,13 @@ effort to mask your identity.
 It is pretty straightforward to generate a random MAC address from the
 command line, or with a scripting language:
 
-    $ openssl rand -hex 6 | sed 's/\(..\)/\1:/g; s/.$//'
+```sh
+$ openssl rand -hex 6 | sed 's/\(..\)/\1:/g; s/.$//'
+```
 
-    $ ruby -e 'puts (1..6).collect { "%02x" % [rand 255] }.join(":")'
+```sh
+$ ruby -e 'puts (1..6).collect { "%02x" % [rand 255] }.join(":")'
+```
 
 However, there are two non-random aspects to real-world MAC addresses.
 First, there is a special meaning to the least significant two bits in
@@ -63,7 +71,9 @@ first three octets of the MAC address.
 creating an otherwise random MAC address. To generate a mostly-random
 MAC address, run `genmac` by itself:
 
-    $ genmac
+```sh
+$ genmac
+```
 
 In the MAC address printed to stdout, all values are random, except that
 the first octet has the second-least significant bit, which determines
@@ -75,19 +85,29 @@ To mark your MAC address as locally administered, which is conventional
 for addresses that are purposely fake or random, pass the `-l` or
 `--local` flag:
 
-    $ genmac -l
+```sh
+$ genmac -l
+```
 
 To generate a large number of MAC addresses, pass `-n` with a numeric
 argument, to print that many addresses:
 
-    $ genmac -n 10
+```sh
+$ genmac -n 10
+```
 
 To generate a more realistic MAC address, the first three octets should
 be taken from a real-world OUI. To do this, you need to download a copy
 of the IEEE maintained list of Organizational Unique Identifiers, which
 is updated daily:
 
-    $ wget http://standards.ieee.org/develop/regauth/oui/oui.txt
+```sh
+$ wget http://standards.ieee.org/develop/regauth/oui/oui.txt
+```
+
+A snapshot of the file is included with `genmac`, however, you should
+check for and download a fresh copy for yourself, as the table is
+updated daily by IEEE.
 
 Save the file to the same directory `genmac` lives in (or, pass the `-f`
 command line argument to point at where the file lives). Then, run
@@ -95,18 +115,24 @@ command line argument to point at where the file lives). Then, run
 to generate a single MAC address that could plausibly have been assigned
 to a Broadcom device:
 
-    $ genmac broadcom
+```sh
+$ genmac broadcom
+```
 
 The organization argument is interpreted as a case-insensitive Ruby
 regular expression, anchored at the left, with a word boundary on the
 right. The following example of creates MAC addresses from multiple
 possible organizations:
 
-    $ genmac -n 20 'apple|motorola|nokia|samsung'
+```sh
+$ genmac -n 20 'apple|motorola|nokia|samsung'
+```
 
 To see what organization names match, pass the `-v` (`--verbose`) flag:
 
-    $ genmac -v google
+```sh
+$ genmac -v google
+```
 
 This program simply prints out the random MAC address. If you wish to
 change your local network interface MAC address, you will need to look
@@ -121,6 +147,12 @@ See Also
 * <https://en.wikipedia.org/wiki/Organizationally_Unique_Identifier>
 * <https://standards.ieee.org/develop/regauth/oui/public.html>
 
+### MAC Address Spoofing ###
+
+* <http://en.wikibooks.org/wiki/Changing_Your_MAC_Address/Linux>
+* <http://osxdaily.com/2012/03/01/change-mac-address-os-x/>
+* <http://www.wikihow.com/Change-a-Computer%27s-Mac-Address-in-Windows>
+
 ### Prior Art ###
 
 * [GNU MAC Changer](https://github.com/alobbs/macchanger)
@@ -133,12 +165,6 @@ See Also
   using a single hardcoded one, and is a standalone program that can
   be run without being installed as a library.
 
-### MAC Address Spoofing ###
-
-* <http://en.wikibooks.org/wiki/Changing_Your_MAC_Address/Linux>
-* <http://osxdaily.com/2012/03/01/change-mac-address-os-x/>
-* <http://www.wikihow.com/Change-a-Computer%27s-Mac-Address-in-Windows>
-
 Author
 ------
 
@@ -146,6 +172,8 @@ Andrew Ho (<andrew@zeuscat.com>)
 
 License
 -------
+
+This project is released under a standard 3-clause BSD license:
 
     Copyright (c) 2014, Andrew Ho
     All rights reserved.
@@ -176,3 +204,7 @@ License
     LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
     NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+All organizational names mentioned in the documentation may be
+trademarks of their respective owners, and organizations mentioned are
+not affiliated with this project in any way other than as example names.
