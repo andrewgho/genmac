@@ -2,11 +2,8 @@
 # genmac - generate valid looking random MAC address
 # Andrew Ho (andrew@zeuscat.com)
 #
-# References:
-# * https://en.wikipedia.org/wiki/MAC_address
-# * https://en.wikipedia.org/wiki/Organizationally_Unique_Identifier
-# * https://standards.ieee.org/develop/regauth/oui/public.html
-# * https://github.com/feross/SpoofMAC
+# For more details, see the README.md that ships with this program, from:
+# https://github.com/andrewgho/genmac
 
 require 'optparse'
 
